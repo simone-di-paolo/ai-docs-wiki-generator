@@ -11,20 +11,36 @@ export const toggleTheme = createAction('app/toggleTheme');
 export const fetchDocs = createAsyncThunk(
     'app/fetchDocs',
     async ({ owner, repo }: { owner: string; repo: string }) => {
-        const data = await fetchDocsFolder(owner, repo);
+        const allDocs: { path: string, name: string, content: string }[] = [];
+        const tree: any[] = [];
 
-        // Find markdown files
-        const mdFiles = data.filter((item: any) => item.type === 'file' && item.name.endsWith('.md'));
+        async function scanFolder(path: string = 'docs') {
+            const data = await fetchDocsFolder(owner, repo, path);
 
-        // Fetch contents concurrently
-        const contents = await Promise.all(
-            mdFiles.map(async (file: any) => {
-                const content = await fetchFileContent(owner, repo, file.path);
-                return { path: file.path, name: file.name, content };
-            })
-        );
+            // Add items to the tree (flat for now or could be structured)
+            tree.push(...data);
 
-        return { tree: data, contents };
+            const mdFiles = data.filter((item: any) => item.type === 'file' && item.name.endsWith('.md'));
+            const subFolders = data.filter((item: any) => item.type === 'dir');
+
+            // Fetch contents of MD files in this folder
+            const contents = await Promise.all(
+                mdFiles.map(async (file: any) => {
+                    const content = await fetchFileContent(owner, repo, file.path);
+                    return { path: file.path, name: file.name, content };
+                })
+            );
+            allDocs.push(...contents);
+
+            // Recursively scan subfolders
+            for (const folder of subFolders) {
+                await scanFolder(folder.path);
+            }
+        }
+
+        await scanFolder();
+
+        return { tree, contents: allDocs };
     }
 );
 

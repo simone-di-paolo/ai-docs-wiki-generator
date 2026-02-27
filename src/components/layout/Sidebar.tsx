@@ -52,7 +52,11 @@ const Sidebar: React.FC = () => {
                             ) : (
                                 <FileText className="icon file-icon" size={16} />
                             )}
-                            <span className="item-name">{item.name}</span>
+                            <span className="item-name">
+                                {item.type === 'dir'
+                                    ? item.name.charAt(0).toUpperCase() + item.name.slice(1).replace(/-/g, ' ')
+                                    : item.name}
+                            </span>
                         </div>
                     ))
                 )}

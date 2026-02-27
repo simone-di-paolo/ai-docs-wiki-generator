@@ -42,11 +42,11 @@ The goal is to build an AI-powered documentation generation and reading system. 
 - [x] Connect History Component to GitHub API (`/commits` endpoint for the specific file)
 
 ### Phase 4: Intelligent AI Docs Automation (Target Repo)
-- [ ] Develop a Node.js script in the target repo to replace simple component-based generation.
-- [ ] Implement full-repository context analysis (to understand logic regardless of naming conventions).
-- [ ] Parse and include existing manual documentation as context for the AI.
-- [ ] Generate functional, architectural, and development-level documentation automatically.
-- [ ] CI/CD Github Action to automatically trigger the documentation update on codebase changes.
+- [x] Decide on Script Language (Python) and Architecture (Docs-as-Code via GitHub Actions).
+- [ ] Rewrite `generate_docs.py` to perform a Full-Repository context analysis (read all `.ts`, `.tsx`, `.scss` in `src/`).
+- [ ] Implement multi-prompting to generate distinct documentation types: Architecture, Functional, and Development.
+- [ ] Output generated markdown files into separate sub-folders (`docs/architettura/`, `docs/funzionale/`, `docs/sviluppo/`).
+- [ ] Update `.github/workflows/update_docs.yml` to support the new global generation process (or verify it works as is).
 
 ### Phase 5: Omniscient AI Chatbot (Wiki App)
 - [ ] Build a floating or split-screen Chat UI within the Wiki.
