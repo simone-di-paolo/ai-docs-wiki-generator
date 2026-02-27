@@ -1,33 +1,37 @@
 import { createReducer } from '@reduxjs/toolkit';
 import * as actions from '../actions/appActions';
 
-interface AppState {
-    targetOwner: string | null;
-    targetRepo: string | null;
+export interface AppState {
+    targetRepoOwner: string;
+    targetRepoName: string;
     docsTree: any[];
-    activeDoc: { path: string; content: string } | null;
+    docsContent: { path: string; name: string; content: string }[];
+    activeDocPath: string | null;
     activeDocHistory: any[];
-    isLoadingHistory: boolean;
     isLoading: boolean;
+    isLoadingHistory: boolean;
     error: string | null;
+    theme: 'light' | 'dark';
 }
 
 const initialState: AppState = {
-    targetOwner: import.meta.env.VITE_TARGET_REPO_OWNER || null,
-    targetRepo: import.meta.env.VITE_TARGET_REPO_NAME || null,
+    targetRepoOwner: import.meta.env.VITE_TARGET_REPO_OWNER || '',
+    targetRepoName: import.meta.env.VITE_TARGET_REPO_NAME || '',
     docsTree: [],
-    activeDoc: null,
+    docsContent: [],
+    activeDocPath: null,
     activeDocHistory: [],
-    isLoadingHistory: false,
     isLoading: false,
+    isLoadingHistory: false,
     error: null,
+    theme: 'light',
 };
 
 export const appReducer = createReducer(initialState, (builder) => {
     builder
         .addCase(actions.setTargetRepo, (state, action) => {
-            state.targetOwner = action.payload.owner;
-            state.targetRepo = action.payload.repo;
+            state.targetRepoOwner = action.payload.owner;
+            state.targetRepoName = action.payload.repo;
         })
         .addCase(actions.setDocsTree, (state, action) => {
             state.docsTree = action.payload;
@@ -35,8 +39,14 @@ export const appReducer = createReducer(initialState, (builder) => {
         .addCase(actions.setAppLoading, (state, action) => {
             state.isLoading = action.payload;
         })
+        .addCase(actions.setActiveDocPath, (state, action) => {
+            state.activeDocPath = action.payload;
+        })
         .addCase(actions.setAppError, (state, action) => {
             state.error = action.payload;
+        })
+        .addCase(actions.toggleTheme, (state) => {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
         })
         // Thunks for fetching Tree
         .addCase(actions.fetchDocs.pending, (state) => {
@@ -45,7 +55,8 @@ export const appReducer = createReducer(initialState, (builder) => {
         })
         .addCase(actions.fetchDocs.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.docsTree = action.payload;
+            state.docsTree = action.payload.tree;
+            state.docsContent = action.payload.contents;
         })
         .addCase(actions.fetchDocs.rejected, (state, action) => {
             state.isLoading = false;
@@ -59,7 +70,7 @@ export const appReducer = createReducer(initialState, (builder) => {
         })
         .addCase(actions.fetchActiveDoc.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.activeDoc = action.payload;
+            state.activeDocPath = action.payload.path;
         })
         .addCase(actions.fetchActiveDoc.rejected, (state, action) => {
             state.isLoading = false;

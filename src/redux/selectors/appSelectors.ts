@@ -1,13 +1,14 @@
 import type { RootState } from '../reducers';
 
-export const selectTargetRepo = (state: RootState) => ({
-    owner: state.app.targetOwner,
-    repo: state.app.targetRepo,
-});
-
+export const selectTargetOwner = (state: RootState) => state.app.targetRepoOwner;
+export const selectTargetRepo = (state: RootState) => state.app.targetRepoName;
 export const selectDocsTree = (state: RootState) => state.app.docsTree;
-export const selectActiveDoc = (state: RootState) => state.app.activeDoc;
+export const selectDocsContent = (state: RootState) => state.app.docsContent;
+export const selectActiveDocPath = (state: RootState) => state.app.activeDocPath;
 export const selectActiveDocHistory = (state: RootState) => state.app.activeDocHistory;
-export const selectAppLoading = (state: RootState) => state.app.isLoading;
+export const selectIsLoadingHistory = (state: RootState) => state.app.isLoadingHistory;
+export const selectIsLoading = (state: RootState) => state.app.isLoading;
+export const selectError = (state: RootState) => state.app.error;
+export const selectTheme = (state: RootState) => state.app.theme;
 export const selectIsHistoryLoading = (state: RootState) => state.app.isLoadingHistory;
-export const selectAppError = (state: RootState) => state.app.error;
+export const selectAppLoading = (state: RootState) => state.app.isLoading;

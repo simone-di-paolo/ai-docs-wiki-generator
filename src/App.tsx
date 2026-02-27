@@ -1,33 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Book, FileText, Folder, Loader2, Clock, AlignLeft } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 
 import type { AppDispatch } from './redux/store';
-import { fetchDocs, fetchActiveDoc } from './redux/actions/appActions';
+import { fetchDocs } from './redux/actions/appActions';
+import { setActiveDocPath } from './redux/actions/appActions';
 import {
+  selectTargetOwner,
   selectTargetRepo,
   selectDocsTree,
-  selectAppLoading,
-  selectAppError,
-  selectActiveDoc
+  selectIsLoading,
+  selectError,
+  selectDocsContent,
+  selectActiveDocPath,
+  selectTheme
 } from './redux/selectors/appSelectors';
 import RevisionHistory from './components/RevisionHistory';
+import AppLayout from './components/layout/AppLayout';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const repo = useSelector(selectTargetRepo);
+  const repoOwner = useSelector(selectTargetOwner);
+  const repoName = useSelector(selectTargetRepo);
   const docsTree = useSelector(selectDocsTree);
-  const activeDoc = useSelector(selectActiveDoc);
-  const isLoading = useSelector(selectAppLoading);
-  const error = useSelector(selectAppError);
+  const docsContent = useSelector(selectDocsContent);
+  const activeDocPath = useSelector(selectActiveDocPath);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const theme = useSelector(selectTheme);
 
   const [activeTab, setActiveTab] = useState<'article' | 'history'>('article');
-
-  // Fetch the initial docs folder on mount
-  const repoOwner = repo.owner;
-  const repoName = repo.repo;
 
   useEffect(() => {
     if (repoOwner && repoName && docsTree.length === 0) {
@@ -35,104 +39,96 @@ function App() {
     }
   }, [dispatch, repoOwner, repoName, docsTree.length]);
 
-  const handleFileClick = (item: any) => {
-    if (item.type === 'file' && typeof item.path === 'string') {
-      dispatch(fetchActiveDoc({ owner: repo.owner!, repo: repo.repo!, path: item.path }));
-      setActiveTab('article'); // Reset back to article reading view when a new file is clicked
+  // Apply theme to body
+  useEffect(() => {
+    document.body.className = theme === 'dark' ? 'dark-theme' : '';
+  }, [theme]);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  // If activeDocContent changes (meaning user picked a new file), reset to article tab
+  useEffect(() => {
+    if (activeDocPath) {
+      setActiveTab('article');
     }
-  };
+  }, [activeDocPath]);
+
+  // Intersection Observer to track scroll positions
+  useEffect(() => {
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const path = entry.target.getAttribute('data-path');
+          if (path) {
+            dispatch(setActiveDocPath(path));
+          }
+        }
+      });
+    }, {
+      root: document.querySelector('.documentation-container'), // Watch scroll inside this area
+      rootMargin: '-10% 0px -70% 0px', // Trigger when element is near top
+      threshold: 0
+    });
+
+    const sections = document.querySelectorAll('.doc-section');
+    sections.forEach(section => observer.current?.observe(section));
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, [docsContent, dispatch]);
 
   return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2><Book className="icon" size={24} /> Wiki Explorer</h2>
-          <span className="repo-badge">{repo.owner}/{repo.repo}</span>
+    <AppLayout
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      hasActiveDoc={docsContent.length > 0}
+    >
+      {error && (
+        <div className="error-banner">
+          <strong>Error:</strong> {error}
         </div>
+      )}
 
-        <div className="file-tree">
-          {isLoading && !activeDoc && docsTree.length === 0 ? (
-            <div style={{ display: 'flex', gap: '0.5rem', color: 'var(--text-muted)' }}>
-              <Loader2 className="icon" size={18} style={{ animation: 'spin 1s linear infinite' }} />
-              Loading...
-            </div>
-          ) : (
-            docsTree.map((item) => (
-              <div
-                key={item.sha}
-                className={`tree-item ${activeDoc?.path === item.path ? 'active' : ''}`}
-                onClick={() => handleFileClick(item)}
-              >
-                {item.type === 'dir' ? (
-                  <Folder className="icon" size={18} />
-                ) : (
-                  <FileText className="icon" size={18} />
-                )}
-                <span>{item.name}</span>
-              </div>
-            ))
-          )}
+      {isLoading && docsContent.length === 0 ? (
+        <div className="empty-state">
+          <Loader2 size={48} className="spin" />
+          <p>Loading repository and documentation...</p>
         </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="main-content">
-        <div className="topbar">
-          <span className="file-info">
-            {activeDoc ? `Reading: ${activeDoc.path}` : 'Select a document'}
-          </span>
-
-          {activeDoc && (
-            <div className="tabs">
-              <button
-                className={activeTab === 'article' ? 'active' : ''}
-                onClick={() => setActiveTab('article')}
+      ) : docsContent.length > 0 ? (
+        activeTab === 'article' ? (
+          <div className="markdown-body">
+            {docsContent.map((doc) => (
+              <section
+                key={doc.path}
+                id={`wiki-${doc.path.replace(/[^a-zA-Z0-9-]/g, '-')}`}
+                data-path={doc.path}
+                className="doc-section"
+                style={{ marginBottom: '4rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-muted)' }}
               >
-                <AlignLeft size={16} /> Article
-              </button>
-              <button
-                className={activeTab === 'history' ? 'active' : ''}
-                onClick={() => setActiveTab('history')}
-              >
-                <Clock size={16} /> History
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="reader-area">
-          {error && (
-            <div style={{ padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-              <strong>Error:</strong> {error}
-            </div>
-          )}
-
-          {isLoading && activeDoc ? (
-            <div className="empty-state">
-              <Loader2 size={48} style={{ animation: 'spin 1s linear infinite' }} />
-              <p>Loading document...</p>
-            </div>
-          ) : activeDoc ? (
-            activeTab === 'article' ? (
-              <div className="markdown-body">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {activeDoc.content}
+                  {doc.content}
                 </ReactMarkdown>
-              </div>
-            ) : (
-              <RevisionHistory />
-            )
-          ) : (
-            <div className="empty-state">
-              <FileText size={64} />
-              <h3>Welcome to your AI Code Wiki</h3>
-              <p>Select a markdown file from the sidebar to start reading.</p>
-            </div>
-          )}
+              </section>
+            ))}
+          </div>
+        ) : (
+          <RevisionHistory />
+        )
+      ) : (
+        <div className="empty-state">
+          <div className="icon-wrapper">
+            <FileText size={64} />
+          </div>
+          <h3>Welcome to your AI Code Wiki</h3>
+          <p>No documentation found or please select a source.</p>
         </div>
-      </main>
-    </div>
+      )}
+    </AppLayout>
   );
 }
 

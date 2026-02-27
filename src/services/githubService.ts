@@ -32,7 +32,15 @@ export const fetchFileContent = async (owner: string, repo: string, path: string
 
     const data = await response.json();
     // Decode base64 content
-    return decodeURIComponent(escape(atob(data.content)));
+    let content = decodeURIComponent(escape(atob(data.content)));
+
+    // Remove enclosing markdown code blocks if the AI generated them by mistake
+    const codeBlockMatch = content.match(/^```(?:markdown|md)?\s*([\s\S]*?)\s*```$/i);
+    if (codeBlockMatch) {
+        content = codeBlockMatch[1];
+    }
+
+    return content;
 };
 
 export const fetchFileHistory = async (owner: string, repo: string, path: string) => {
