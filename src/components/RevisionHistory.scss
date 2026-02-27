@@ -1,0 +1,139 @@
+.history-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    color: var(--text-muted);
+
+    svg {
+        margin-bottom: 1rem;
+        color: var(--border-color);
+    }
+
+    .spinner {
+        animation: spin 1s linear infinite;
+        color: var(--primary-color);
+    }
+}
+
+.revision-history {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+
+    .timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0;
+
+        .timeline-item {
+            display: flex;
+            position: relative;
+            margin-bottom: 2rem;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .timeline-marker {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-right: 1.5rem;
+
+                div.dot {
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 50%;
+                    background-color: var(--bg-color);
+                    border: 3px solid var(--primary-color);
+                    z-index: 2;
+                    box-shadow: 0 0 0 4px var(--secondary-color);
+                }
+
+                div.line {
+                    width: 2px;
+                    background-color: var(--border-color);
+                    flex-grow: 1;
+                    margin-top: 4px;
+                    margin-bottom: -2rem;
+                    /* Connects the dots visually */
+                }
+            }
+
+            .timeline-content {
+                flex: 1;
+                background-color: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 0.5rem;
+                padding: 1rem 1.25rem;
+                box-shadow: var(--shadow-sm);
+                transition: transform 0.2s, box-shadow 0.2s;
+
+                &:hover {
+                    box-shadow: var(--shadow-md);
+                    border-color: #cbd5e1;
+                }
+
+                .commit-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 0.75rem;
+
+                    .commit-message {
+                        font-weight: 600;
+                        color: var(--text-main);
+                        font-size: 1rem;
+                        line-height: 1.4;
+                    }
+
+                    .commit-sha {
+                        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                        font-size: 0.75rem;
+                        color: var(--primary-color);
+                        background-color: #eef2ff;
+                        padding: 0.2rem 0.5rem;
+                        border-radius: 0.25rem;
+                        text-decoration: none;
+
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+                }
+
+                .commit-meta {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+
+                    .author-info {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+
+                        .avatar {
+                            width: 20px;
+                            height: 20px;
+                            border-radius: 50%;
+                        }
+
+                        .icon-fallback {
+                            color: var(--icon-color);
+                        }
+
+                        .author-name {
+                            font-weight: 500;
+                            color: var(--text-main);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
