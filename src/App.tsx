@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
-import rehypeMermaid from 'rehype-mermaid';
+import Mermaid from './components/Mermaid';
 import { Loader2, FileText } from 'lucide-react';
 
 
@@ -122,7 +122,25 @@ function App() {
               >
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeSlug, [rehypeMermaid, { strategy: 'img-svg' }]]}
+                    rehypePlugins={[rehypeSlug]}
+                    components={{
+                      code({ node, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const content = String(children).replace(/\n$/, '');
+                        
+                        // Handle Mermaid diagrams
+                        if (match && match[1] === 'mermaid') {
+                          return <Mermaid key={content} chart={content} />;
+                        }
+                        
+                        // Default code rendering
+                        return (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      }
+                    }}
                 >
                   {currentDoc.content}
                 </ReactMarkdown>

@@ -27,7 +27,7 @@ const initialState: AppState = {
     isLoading: false,
     isLoadingHistory: false,
     error: null,
-    theme: 'light',
+    theme: 'dark',
 };
 
 
