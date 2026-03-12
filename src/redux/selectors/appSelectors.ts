@@ -5,6 +5,7 @@ export const selectTargetRepo = (state: RootState) => state.app.targetRepoName;
 export const selectDocsTree = (state: RootState) => state.app.docsTree;
 export const selectDocsContent = (state: RootState) => state.app.docsContent;
 export const selectActiveDocPath = (state: RootState) => state.app.activeDocPath;
+export const selectActiveCategory = (state: RootState) => state.app.activeCategory;
 export const selectActiveDocHistory = (state: RootState) => state.app.activeDocHistory;
 export const selectIsLoadingHistory = (state: RootState) => state.app.isLoadingHistory;
 export const selectIsLoading = (state: RootState) => state.app.isLoading;

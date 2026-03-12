@@ -5,6 +5,7 @@ export const setTargetRepo = createAction<{ owner: string; repo: string }>('app/
 export const setDocsTree = createAction<any[]>('app/setDocsTree');
 export const setAppLoading = createAction<boolean>('app/setAppLoading');
 export const setActiveDocPath = createAction<string | null>('app/setActiveDocPath');
+export const setActiveCategory = createAction<'architettura' | 'funzionale' | 'sviluppo'>('app/setActiveCategory');
 export const setAppError = createAction<string | null>('app/setAppError');
 export const toggleTheme = createAction('app/toggleTheme');
 
@@ -20,8 +21,8 @@ export const fetchDocs = createAsyncThunk(
             // Add items to the tree (flat for now or could be structured)
             tree.push(...data);
 
-            const mdFiles = data.filter((item: any) => item.type === 'file' && item.name.endsWith('.md'));
-            const subFolders = data.filter((item: any) => item.type === 'dir');
+            const mdFiles = data.filter((item: any) => item.type === 'file' && item.name.endsWith('.md') && !item.path.includes('history'));
+            const subFolders = data.filter((item: any) => item.type === 'dir' && item.name !== 'history'); // Ignora la cartella history per il content principale
 
             // Fetch contents of MD files in this folder
             const contents = await Promise.all(
