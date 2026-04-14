@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import TopHeader from './TopHeader';
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -13,6 +14,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, onTabChange,
     return (
         <div className="app-container">
             <Header />
+            <TopHeader />
             <div className="documentation-container">
                 <Sidebar />
                 <main className="main-content">

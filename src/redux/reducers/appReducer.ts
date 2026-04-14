@@ -7,6 +7,7 @@ export interface AppState {
     docsTree: any[];
     docsContent: { path: string; name: string; content: string }[];
     activeDocPath: string | null;
+    activeCategory: 'architettura' | 'funzionale' | 'sviluppo';
     activeDocHistory: any[];
     isLoading: boolean;
     isLoadingHistory: boolean;
@@ -14,18 +15,21 @@ export interface AppState {
     theme: 'light' | 'dark';
 }
 
+
 const initialState: AppState = {
     targetRepoOwner: import.meta.env.VITE_TARGET_REPO_OWNER || '',
     targetRepoName: import.meta.env.VITE_TARGET_REPO_NAME || '',
     docsTree: [],
     docsContent: [],
     activeDocPath: null,
+    activeCategory: 'architettura',
     activeDocHistory: [],
     isLoading: false,
     isLoadingHistory: false,
     error: null,
-    theme: 'light',
+    theme: 'dark',
 };
+
 
 export const appReducer = createReducer(initialState, (builder) => {
     builder
@@ -41,6 +45,10 @@ export const appReducer = createReducer(initialState, (builder) => {
         })
         .addCase(actions.setActiveDocPath, (state, action) => {
             state.activeDocPath = action.payload;
+        })
+        .addCase(actions.setActiveCategory, (state, action) => {
+            state.activeCategory = action.payload;
+            state.activeDocPath = null; // Resetta il doc attivo quando cambi tab
         })
         .addCase(actions.setAppError, (state, action) => {
             state.error = action.payload;

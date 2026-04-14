@@ -36,20 +36,9 @@
             color: var(--accent);
         }
     }
-
-    .repo-badge {
-        align-self: flex-start;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 12px;
-        background: var(--accent-surface);
-        color: var(--accent);
-        letter-spacing: 0.02em;
-    }
 }
 
-.file-tree {
+.toc-content {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -64,47 +53,64 @@
     padding: 1rem 0;
 }
 
-.tree-item {
+.empty-state-sidebar {
+    color: var(--neutral);
+    font-size: 0.875rem;
+    font-style: italic;
+    padding: 1rem 0;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    color: var(--on-surface-variant);
+    flex-direction: column;
+    gap: 4px;
+}
 
-    &:hover {
-        background-color: var(--neutral-container);
-        color: var(--on-surface);
-    }
+.toc-item {
+    a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        color: var(--on-surface-variant);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.15s ease;
+        line-height: 1.3;
 
-    &.active {
-        background-color: var(--accent-surface);
-        color: var(--accent);
-        font-weight: 500;
+        &:hover {
+            background-color: var(--neutral-container);
+            color: var(--on-surface);
+        }
 
-        .icon {
-            color: var(--accent);
+        .bullet-icon {
+            color: var(--neutral);
+            flex-shrink: 0;
         }
     }
-
-    .icon {
-        flex-shrink: 0;
+    
+    // Header level indentations
+    &.level-1 {
+        a {
+            font-weight: 600;
+            color: var(--on-surface);
+            padding-top: 10px;
+        }
+    }
+    
+    &.level-2 {
+        a { margin-left: 0.5rem; }
+    }
+    
+    &.level-3 {
+        a { margin-left: 1.5rem; font-size: 0.8125rem;}
     }
 
-    .folder-icon {
-        color: var(--neutral);
-    }
-
-    .file-icon {
-        color: var(--neutral);
-    }
-
-    .item-name {
-        font-size: 0.875rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    &.level-4 {
+        a { margin-left: 2.5rem; font-size: 0.8125rem;}
     }
 }

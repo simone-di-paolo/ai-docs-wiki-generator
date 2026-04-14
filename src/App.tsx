@@ -1,8 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+import Mermaid from './components/Mermaid';
 import { Loader2, FileText } from 'lucide-react';
+
 
 import type { AppDispatch } from './redux/store';
 import { fetchDocs } from './redux/actions/appActions';
@@ -15,6 +18,7 @@ import {
   selectError,
   selectDocsContent,
   selectActiveDocPath,
+  selectActiveCategory,
   selectTheme
 } from './redux/selectors/appSelectors';
 import RevisionHistory from './components/RevisionHistory';
@@ -27,11 +31,18 @@ function App() {
   const docsTree = useSelector(selectDocsTree);
   const docsContent = useSelector(selectDocsContent);
   const activeDocPath = useSelector(selectActiveDocPath);
+  const activeCategory = useSelector(selectActiveCategory);
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
   const theme = useSelector(selectTheme);
 
   const [activeTab, setActiveTab] = useState<'article' | 'history'>('article');
+
+  // Filter doc based on current category
+  const currentDoc = useMemo(() => {
+    return docsContent.find(doc => doc.path.includes(activeCategory));
+  }, [docsContent, activeCategory]);
+
 
   useEffect(() => {
     if (repoOwner && repoName && docsTree.length === 0) {
@@ -99,26 +110,46 @@ function App() {
           <Loader2 size={48} className="spin" />
           <p>Loading repository and documentation...</p>
         </div>
-      ) : docsContent.length > 0 ? (
+      ) : currentDoc ? (
         activeTab === 'article' ? (
           <div className="markdown-body">
-            {docsContent.map((doc) => (
               <section
-                key={doc.path}
-                id={`wiki-${doc.path.replace(/[^a-zA-Z0-9-]/g, '-')}`}
-                data-path={doc.path}
+                key={currentDoc.path}
+                id={`wiki-${currentDoc.path.replace(/[^a-zA-Z0-9-]/g, '-')}`}
+                data-path={currentDoc.path}
                 className="doc-section"
-                style={{ marginBottom: '4rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-muted)' }}
+                style={{ marginBottom: '4rem', paddingBottom: '2rem' }}
               >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {doc.content}
+                <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeSlug]}
+                    components={{
+                      code({ node, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const content = String(children).replace(/\n$/, '');
+                        
+                        // Handle Mermaid diagrams
+                        if (match && match[1] === 'mermaid') {
+                          return <Mermaid key={content} chart={content} />;
+                        }
+                        
+                        // Default code rendering
+                        return (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      }
+                    }}
+                >
+                  {currentDoc.content}
                 </ReactMarkdown>
               </section>
-            ))}
           </div>
         ) : (
           <RevisionHistory />
         )
+
       ) : (
         <div className="empty-state">
           <div className="icon-wrapper">

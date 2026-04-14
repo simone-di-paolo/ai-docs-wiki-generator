@@ -1,13 +1,12 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Search, Sun, Moon } from 'lucide-react';
-import { selectTargetRepo, selectTheme } from '../../redux/selectors/appSelectors';
+import { selectTheme } from '../../redux/selectors/appSelectors';
 import { toggleTheme } from '../../redux/actions/appActions';
 import './Header.scss';
 
 const Header: React.FC = () => {
     const dispatch = useDispatch();
-    const repo = useSelector(selectTargetRepo);
     const theme = useSelector(selectTheme);
 
     return (
